@@ -150,6 +150,7 @@ export class Splitter extends BaseComponent {
 
         if (this.el && this.el.nativeElement && this.panels().length > 0) {
             this._panelSizes = this.computePanelSizes(val);
+            this.resizeFromElements(this._panelSizes);
         }
     }
     /**
@@ -224,6 +225,7 @@ export class Splitter extends BaseComponent {
                 this._panelSizes = !initialized ? this.computePanelSizes(this.panelSizes) : savedPanelSizes;
 
                 if (!initialized) {
+                    this.resizeFromElements(this._panelSizes);
                     this.prevSize = parseFloat(`${this._panelSizes[0]}`).toFixed(4);
                 } else {
                     this.resizeFromContainers(this._panelSizes);
@@ -550,14 +552,16 @@ export class Splitter extends BaseComponent {
         children.forEach((child, i) => this.resizeChild(child, i, _panelSizes));
     }
 
-    computePanelSizes(panelSizes: number[]) {
+    resizeFromElements(_panelSizes: number[]) {
         let children = [...this.el.nativeElement.children[0].children].filter((child) => DomHandler.hasClass(child, 'p-splitter-panel'));
-        let _panelSizes = [];
+        this.panels().forEach((_, i) => this.resizeChild(children[i], i, _panelSizes));
+    }
 
-        this.panels().map((_, i) => {
+    computePanelSizes(panelSizes: number[]) {
+        let _panelSizes = [];
+        this.panels().forEach((_, i) => {
             let panelInitialSize = panelSizes.length - 1 >= i ? panelSizes[i] : null;
             _panelSizes[i] = panelInitialSize || 100 / this.panels().length;
-            this.resizeChild(children[i], i, _panelSizes);
         });
         return _panelSizes;
     }
