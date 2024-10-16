@@ -527,16 +527,21 @@ export class Splitter extends BaseComponent {
         }
     });
 
+    savedPanelSizes = computed<number[] | null>(() => {
+        const storage = this.getStorage();
+        const stateString = storage.getItem(this.stateKey() as string);
+        return stateString ? (JSON.parse(stateString) as any[]).map(numberAttribute) : null;
+    });
+
     saveState() {
         this.getStorage().setItem(this.stateKey() as string, JSON.stringify(this._panelSizes));
     }
 
     restoreState() {
-        const storage = this.getStorage();
-        const stateString = storage.getItem(this.stateKey() as string);
+        const savedPanelSizes = this.savedPanelSizes();
 
-        if (stateString) {
-            this._panelSizes = JSON.parse(stateString);
+        if (savedPanelSizes) {
+            this._panelSizes = savedPanelSizes;
             let children = [...(this.containerViewChild as ElementRef).nativeElement.children].filter((child) =>
                 DomHandler.hasClass(child, 'p-splitter-panel'),
             );
