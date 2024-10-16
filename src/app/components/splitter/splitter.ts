@@ -146,10 +146,9 @@ export class Splitter extends BaseComponent {
         return this._panelSizes;
     }
     set panelSizes(val: number[]) {
-        this._panelSizes = val;
+        this._panelSizes = this.computePanelSizes(val);
 
         if (this.el && this.el.nativeElement && this.panels().length > 0) {
-            this._panelSizes = this.computePanelSizes(val);
             this.resizeFromElements(this._panelSizes);
         }
     }
@@ -225,7 +224,9 @@ export class Splitter extends BaseComponent {
                 this._panelSizes = !initialized ? this.computePanelSizes(this.panelSizes) : savedPanelSizes;
 
                 if (!initialized) {
-                    this.resizeFromElements(this._panelSizes);
+                    if (this.el && this.el.nativeElement) {
+                        this.resizeFromElements(this._panelSizes);
+                    }
                     this.prevSize = parseFloat(`${this._panelSizes[0]}`).toFixed(4);
                 } else {
                     this.resizeFromContainers(this._panelSizes);
