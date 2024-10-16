@@ -40,7 +40,7 @@ import { SplitterStyle } from './style/splitterstyle';
             [attr.data-p-gutter-resizing]="false"
             [attr.data-pc-section]="'root'"
         >
-            <ng-template ngFor let-panel [ngForOf]="panels" let-i="index">
+            @for (panel of panels; track i; let i = $index) {
                 <div
                     [ngClass]="panelContainerClass()"
                     [class]="panelStyleClass"
@@ -51,30 +51,31 @@ import { SplitterStyle } from './style/splitterstyle';
                 >
                     <ng-container *ngTemplateOutlet="panel"></ng-container>
                 </div>
-                <div
-                    *ngIf="i !== panels.length - 1"
-                    class="p-splitter-gutter"
-                    role="separator"
-                    tabindex="-1"
-                    (mousedown)="onGutterMouseDown($event, i)"
-                    (touchstart)="onGutterTouchStart($event, i)"
-                    (touchmove)="onGutterTouchMove($event)"
-                    (touchend)="onGutterTouchEnd($event)"
-                    [attr.data-p-gutter-resizing]="false"
-                    [attr.data-pc-section]="'gutter'"
-                >
+                @if (i !== panels.length - 1) {
                     <div
-                        class="p-splitter-gutter-handle"
-                        tabindex="0"
-                        [ngStyle]="gutterStyle()"
-                        [attr.aria-orientation]="layout"
-                        [attr.aria-valuenow]="prevSize"
-                        [attr.data-pc-section]="'gutterhandle'"
-                        (keyup)="onGutterKeyUp($event)"
-                        (keydown)="onGutterKeyDown($event, i)"
-                    ></div>
-                </div>
-            </ng-template>
+                        class="p-splitter-gutter"
+                        role="separator"
+                        tabindex="-1"
+                        (mousedown)="onGutterMouseDown($event, i)"
+                        (touchstart)="onGutterTouchStart($event, i)"
+                        (touchmove)="onGutterTouchMove($event)"
+                        (touchend)="onGutterTouchEnd($event)"
+                        [attr.data-p-gutter-resizing]="false"
+                        [attr.data-pc-section]="'gutter'"
+                    >
+                        <div
+                            class="p-splitter-gutter-handle"
+                            tabindex="0"
+                            [ngStyle]="gutterStyle()"
+                            [attr.aria-orientation]="layout"
+                            [attr.aria-valuenow]="prevSize"
+                            [attr.data-pc-section]="'gutterhandle'"
+                            (keyup)="onGutterKeyUp($event)"
+                            (keydown)="onGutterKeyDown($event, i)"
+                        ></div>
+                    </div>
+                }
+            }
         </div>
     `,
     encapsulation: ViewEncapsulation.None,
