@@ -20,6 +20,7 @@ import {
     numberAttribute,
     computed,
     effect,
+    signal,
 } from '@angular/core';
 import { PrimeTemplate, SharedModule } from 'primeng/api';
 import { DomHandler } from 'primeng/dom';
@@ -168,7 +169,7 @@ export class Splitter extends BaseComponent {
         return this.templates().map((item) => item.template);
     });
 
-    dragging: boolean = false;
+    dragging = signal<boolean>(false);
 
     mouseMoveListener: VoidListener;
 
@@ -236,7 +237,7 @@ export class Splitter extends BaseComponent {
             : DomHandler.getHeight((this.containerViewChild as ElementRef).nativeElement);
 
         if (!isKeyDown) {
-            this.dragging = true;
+            this.dragging.set(true);
             this.startPos = this.horizontal()
                 ? event instanceof MouseEvent
                     ? event.pageX
@@ -481,7 +482,7 @@ export class Splitter extends BaseComponent {
     }
 
     clear() {
-        this.dragging = false;
+        this.dragging.set(false);
         this.size = null;
         this.startPos = null;
         this.prevPanelElement = null;
