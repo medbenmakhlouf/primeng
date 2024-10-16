@@ -61,10 +61,10 @@ import { SplitterStyle } from './style/splitterstyle';
                         class="p-splitter-gutter"
                         role="separator"
                         tabindex="-1"
-                        (mousedown)="onGutterMouseDown($event, i)"
-                        (touchstart)="onGutterTouchStart($event, i)"
+                        (mousedown)="onGutterMouseDown(container, $event, i)"
+                        (touchstart)="onGutterTouchStart(container, $event, i)"
                         (touchmove)="onGutterTouchMove($event)"
-                        (touchend)="onGutterTouchEnd($event)"
+                        (touchend)="onGutterTouchEnd(container, $event)"
                         [attr.data-p-gutter-resizing]="false"
                         [attr.data-pc-section]="'gutter'"
                     >
@@ -75,8 +75,8 @@ import { SplitterStyle } from './style/splitterstyle';
                             [attr.aria-orientation]="layout()"
                             [attr.aria-valuenow]="prevSize"
                             [attr.data-pc-section]="'gutterhandle'"
-                            (keyup)="onGutterKeyUp($event)"
-                            (keydown)="onGutterKeyDown($event, i)"
+                            (keyup)="onGutterKeyUp(container, $event)"
+                            (keydown)="onGutterKeyDown(container, $event, i)"
                         ></div>
                     </div>
                 }
@@ -222,7 +222,7 @@ export class Splitter extends BaseComponent {
                         this.prevSize = parseFloat(`${panelSizes[0]}`).toFixed(4);
                     } else {
                         if (this.containerViewChild()) {
-                            this.resizeFromContainers(panelSizes);
+                            this.resizeFromContainers((this.containerViewChild() as ElementRef).nativeElement, panelSizes);
                         }
                     }
                 }
@@ -235,10 +235,9 @@ export class Splitter extends BaseComponent {
         this.nested.set(this.isNested());
     }
 
-    resizeStart(event: TouchEvent | MouseEvent, index: number, isKeyDown?: boolean) {
+    resizeStart(container: HTMLDivElement, event: TouchEvent | MouseEvent, index: number, isKeyDown?: boolean) {
         this.gutterElement = (event.currentTarget as HTMLElement) || (event.target as HTMLElement).parentElement;
-        const containerElement = (this.containerViewChild() as ElementRef).nativeElement;
-        this.size.set(this.horizontal() ? DomHandler.getWidth(containerElement) : DomHandler.getHeight(containerElement));
+        this.size.set(this.horizontal() ? DomHandler.getWidth(container) : DomHandler.getHeight(container));
 
         if (!isKeyDown) {
             this.dragging.set(true);
@@ -280,8 +279,8 @@ export class Splitter extends BaseComponent {
         this.prevPanelIndex = index;
         DomHandler.addClass(this.gutterElement, 'p-splitter-gutter-resizing');
         this.gutterElement.setAttribute('data-p-gutter-resizing', 'true');
-        DomHandler.addClass((this.containerViewChild() as ElementRef).nativeElement, 'p-splitter-resizing');
-        this.containerViewChild().nativeElement.setAttribute('data-p-resizing', 'true');
+        DomHandler.addClass(container, 'p-splitter-resizing');
+        container.setAttribute('data-p-resizing', 'true');
         this.onResizeStart.emit({ originalEvent: event, sizes: this._panelSizes().values() });
     }
 
@@ -319,26 +318,26 @@ export class Splitter extends BaseComponent {
         }
     }
 
-    resizeEnd(event: MouseEvent | TouchEvent) {
+    resizeEnd(container: HTMLDivElement, event: MouseEvent | TouchEvent) {
         if (this.isStateful()) {
             this.saveState();
         }
 
         this.onResizeEnd.emit({ originalEvent: event, sizes: this._panelSizes().values() });
         DomHandler.removeClass(this.gutterElement, 'p-splitter-gutter-resizing');
-        DomHandler.removeClass((this.containerViewChild() as ElementRef).nativeElement, 'p-splitter-resizing');
+        DomHandler.removeClass(container, 'p-splitter-resizing');
         this.clear();
     }
 
-    onGutterMouseDown(event: MouseEvent, index: number) {
-        this.resizeStart(event, index);
-        this.bindMouseListeners();
+    onGutterMouseDown(container: HTMLDivElement, event: MouseEvent, index: number) {
+        this.resizeStart(container, event, index);
+        this.bindMouseListeners(container);
     }
 
-    onGutterTouchStart(event: TouchEvent, index: number) {
+    onGutterTouchStart(container: HTMLDivElement, event: TouchEvent, index: number) {
         if (event.cancelable) {
-            this.resizeStart(event, index);
-            this.bindTouchListeners();
+            this.resizeStart(container, event, index);
+            this.bindTouchListeners(container);
 
             event.preventDefault();
         }
@@ -349,22 +348,22 @@ export class Splitter extends BaseComponent {
         event.preventDefault();
     }
 
-    onGutterTouchEnd(event: TouchEvent) {
-        this.resizeEnd(event);
+    onGutterTouchEnd(container: HTMLDivElement, event: TouchEvent) {
+        this.resizeEnd(container, event);
         this.unbindTouchListeners();
 
         if (event.cancelable) event.preventDefault();
     }
 
-    repeat(event, index, step) {
-        this.resizeStart(event, index, true);
+    repeat(container: HTMLDivElement, event, index, step) {
+        this.resizeStart(container, event, index, true);
         this.onResize(event, step, true);
     }
 
-    setTimer(event, index, step) {
+    setTimer(container: HTMLDivElement, event, index, step) {
         this.clearTimer();
         this.timer = setTimeout(() => {
-            this.repeat(event, index, step);
+            this.repeat(container, event, index, step);
         }, 40);
     }
 
@@ -374,16 +373,16 @@ export class Splitter extends BaseComponent {
         }
     }
 
-    onGutterKeyUp(event) {
+    onGutterKeyUp(container: HTMLDivElement, event) {
         this.clearTimer();
-        this.resizeEnd(event);
+        this.resizeEnd(container, event);
     }
 
-    onGutterKeyDown(event, index) {
+    onGutterKeyDown(container: HTMLDivElement, event, index) {
         switch (event.code) {
             case 'ArrowLeft': {
                 if (this.horizontal()) {
-                    this.setTimer(event, index, this.step() * -1);
+                    this.setTimer(container, event, index, this.step() * -1);
                 }
 
                 event.preventDefault();
@@ -392,7 +391,7 @@ export class Splitter extends BaseComponent {
 
             case 'ArrowRight': {
                 if (this.horizontal()) {
-                    this.setTimer(event, index, this.step());
+                    this.setTimer(container, event, index, this.step());
                 }
 
                 event.preventDefault();
@@ -401,7 +400,7 @@ export class Splitter extends BaseComponent {
 
             case 'ArrowDown': {
                 if (this.layout() === 'vertical') {
-                    this.setTimer(event, index, this.step() * -1);
+                    this.setTimer(container, event, index, this.step() * -1);
                 }
 
                 event.preventDefault();
@@ -410,7 +409,7 @@ export class Splitter extends BaseComponent {
 
             case 'ArrowUp': {
                 if (this.layout() === 'vertical') {
-                    this.setTimer(event, index, this.step());
+                    this.setTimer(container, event, index, this.step());
                 }
 
                 event.preventDefault();
@@ -435,7 +434,7 @@ export class Splitter extends BaseComponent {
         return true;
     }
 
-    bindMouseListeners() {
+    bindMouseListeners(container: HTMLDivElement) {
         if (!this.mouseMoveListener) {
             this.mouseMoveListener = this.renderer.listen(this.document, 'mousemove', (event) => {
                 this.onResize(event);
@@ -444,13 +443,13 @@ export class Splitter extends BaseComponent {
 
         if (!this.mouseUpListener) {
             this.mouseUpListener = this.renderer.listen(this.document, 'mouseup', (event) => {
-                this.resizeEnd(event);
+                this.resizeEnd(container, event);
                 this.unbindMouseListeners();
             });
         }
     }
 
-    bindTouchListeners() {
+    bindTouchListeners(container: HTMLDivElement) {
         if (!this.touchMoveListener) {
             this.touchMoveListener = this.renderer.listen(this.document, 'touchmove', (event) => {
                 this.onResize(event.changedTouches[0]);
@@ -459,7 +458,7 @@ export class Splitter extends BaseComponent {
 
         if (!this.touchEndListener) {
             this.touchEndListener = this.renderer.listen(this.document, 'touchend', (event) => {
-                this.resizeEnd(event);
+                this.resizeEnd(container, event);
                 this.unbindTouchListeners();
             });
         }
@@ -549,10 +548,8 @@ export class Splitter extends BaseComponent {
         child.style.flexBasis = 'calc(' + _panelSizes[i] + '% - ' + (this.panels().length - 1) * this.gutterSize() + 'px)';
     }
 
-    resizeFromContainers(_panelSizes: number[]) {
-        let children = [...(this.containerViewChild() as ElementRef).nativeElement.children].filter((child) =>
-            DomHandler.hasClass(child, 'p-splitter-panel'),
-        );
+    resizeFromContainers(container: HTMLDivElement, _panelSizes: number[]) {
+        let children = Array.from(container.children).filter((child) => DomHandler.hasClass(child, 'p-splitter-panel'));
         children.forEach((child, i) => this.resizeChild(child, i, _panelSizes));
     }
 
