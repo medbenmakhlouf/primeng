@@ -86,7 +86,7 @@ import { SplitterStyle } from './style/splitterstyle';
     encapsulation: ViewEncapsulation.None,
     changeDetection: ChangeDetectionStrategy.OnPush,
     host: {
-        '[class.p-splitter-panel-nested]': 'nested',
+        '[class.p-splitter-panel-nested]': 'nested()',
     },
     providers: [SplitterStyle],
 })
@@ -163,7 +163,7 @@ export class Splitter extends BaseComponent {
 
     containerViewChild: Signal<Nullable<ElementRef>> = viewChild<Nullable<ElementRef>>('container');
 
-    nested: boolean = false;
+    nested = signal<boolean>(false);
 
     panels = computed<TemplateRef<any>[]>(() => {
         if (!this.templates()) return [];
@@ -232,7 +232,7 @@ export class Splitter extends BaseComponent {
 
     ngOnInit() {
         super.ngOnInit();
-        this.nested = this.isNested();
+        this.nested.set(this.isNested());
     }
 
     resizeStart(event: TouchEvent | MouseEvent, index: number, isKeyDown?: boolean) {
