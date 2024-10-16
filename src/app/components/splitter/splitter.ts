@@ -59,7 +59,7 @@ import { SplitterStyle } from './style/splitterstyle';
                     (mousedown)="onGutterMouseDown($event, i)"
                     (touchstart)="onGutterTouchStart($event, i)"
                     (touchmove)="onGutterTouchMove($event)"
-                    (touchend)="onGutterTouchEnd($event, i)"
+                    (touchend)="onGutterTouchEnd($event)"
                     [attr.data-p-gutter-resizing]="false"
                     [attr.data-pc-section]="'gutter'"
                 >
