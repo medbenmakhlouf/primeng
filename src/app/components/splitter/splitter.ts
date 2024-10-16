@@ -5,12 +5,12 @@ import {
     Component,
     ContentChildren,
     ElementRef,
-    EventEmitter,
+    OutputEmitterRef,
     Inject,
     Input,
     input,
     NgModule,
-    Output,
+    output,
     PLATFORM_ID,
     QueryList,
     Renderer2,
@@ -167,13 +167,13 @@ export class Splitter extends BaseComponent {
      * @param {SplitterResizeEndEvent} event - Custom panel resize end event
      * @group Emits
      */
-    @Output() onResizeEnd: EventEmitter<SplitterResizeEndEvent> = new EventEmitter<SplitterResizeEndEvent>();
+    onResizeEnd: OutputEmitterRef<SplitterResizeEndEvent> = output<SplitterResizeEndEvent>();
     /**
      * Callback to invoke when resize starts.
      * @param {SplitterResizeStartEvent} event - Custom panel resize start event
      * @group Emits
      */
-    @Output() onResizeStart: EventEmitter<SplitterResizeStartEvent> = new EventEmitter<SplitterResizeStartEvent>();
+    onResizeStart: OutputEmitterRef<SplitterResizeStartEvent> = output<SplitterResizeStartEvent>();
 
     @ContentChildren(PrimeTemplate) templates!: QueryList<PrimeTemplate>;
 
