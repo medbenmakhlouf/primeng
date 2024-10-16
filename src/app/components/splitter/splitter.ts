@@ -18,6 +18,7 @@ import {
     ViewEncapsulation,
     inject,
     numberAttribute,
+    computed,
 } from '@angular/core';
 import { PrimeTemplate, SharedModule } from 'primeng/api';
 import { DomHandler } from 'primeng/dom';
@@ -111,7 +112,7 @@ export class Splitter extends BaseComponent {
      * Defines where a stateful splitter keeps its state, valid values are 'session' for sessionStorage and 'local' for localStorage.
      * @group Props
      */
-    @Input() stateStorage: string | undefined = 'session';
+    stateStorage = input<string>('session');
     /**
      * Storage identifier of a stateful Splitter.
      * @group Props
@@ -545,9 +546,9 @@ export class Splitter extends BaseComponent {
         return this.stateKey != null;
     }
 
-    getStorage() {
+    getStorage = computed(() => {
         if (isPlatformBrowser(this.platformId)) {
-            switch (this.stateStorage) {
+            switch (this.stateStorage()) {
                 case 'local':
                     return this.document.defaultView.localStorage;
 
@@ -556,13 +557,13 @@ export class Splitter extends BaseComponent {
 
                 default:
                     throw new Error(
-                        this.stateStorage + ' is not a valid value for the state storage, supported values are "local" and "session".',
+                        this.stateStorage() + ' is not a valid value for the state storage, supported values are "local" and "session".',
                     );
             }
         } else {
             throw new Error('Storage is not a available by default on the server.');
         }
-    }
+    });
 
     saveState() {
         this.getStorage().setItem(this.stateKey as string, JSON.stringify(this._panelSizes));
