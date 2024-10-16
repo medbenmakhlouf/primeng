@@ -45,7 +45,7 @@ import { SplitterStyle } from './style/splitterstyle';
             [attr.data-p-gutter-resizing]="false"
             [attr.data-pc-section]="'root'"
         >
-            @for (panel of panels(); track i; let i = $index) {
+            @for (panel of panels(); track i; let i = $index; let last = $last) {
                 <div
                     [ngClass]="panelContainerClass()"
                     [class]="panelStyleClass()"
@@ -56,7 +56,7 @@ import { SplitterStyle } from './style/splitterstyle';
                 >
                     <ng-container *ngTemplateOutlet="panel"></ng-container>
                 </div>
-                @if (i !== panels().length - 1) {
+                @if (!last) {
                     <div
                         class="p-splitter-gutter"
                         role="separator"
@@ -197,7 +197,8 @@ export class Splitter extends BaseComponent {
     initialized = computed<boolean>(() => (this.isStateful() ? this.savedPanelSizes() !== null : false));
 
     _panelSizes = computed(() => {
-        const initialPanelSizes = !this.initialized() ? this.computePanelSizes(this.panelSizes()) : this.savedPanelSizes();
+        const sizeFromPanels = this.panels()?.length > 0 ? this.computePanelSizes(this.panels(), this.panelSizes()) : [];
+        const initialPanelSizes = !this.initialized() ? sizeFromPanels : this.savedPanelSizes();
         return { values: signal(initialPanelSizes) };
     });
 
@@ -212,12 +213,13 @@ export class Splitter extends BaseComponent {
     constructor() {
         super();
         effect(() => {
+            const panels = this.panels();
             if (isPlatformBrowser(this.platformId)) {
-                if (this.panels() && this.panels().length) {
+                if (panels && panels.length) {
                     const panelSizes = untracked(this._panelSizes().values);
                     if (!this.initialized()) {
                         if (this.el && this.el.nativeElement) {
-                            this.resizeFromElements(panelSizes);
+                            this.resizeFromElements(panels, panelSizes);
                         }
                         this.prevSize = parseFloat(`${panelSizes[0]}`).toFixed(4);
                     } else {
@@ -553,16 +555,16 @@ export class Splitter extends BaseComponent {
         children.forEach((child, i) => this.resizeChild(child, i, _panelSizes));
     }
 
-    resizeFromElements(_panelSizes: number[]) {
+    resizeFromElements(panels: TemplateRef<any>[], _panelSizes: number[]) {
         let children = [...this.el.nativeElement.children[0].children].filter((child) => DomHandler.hasClass(child, 'p-splitter-panel'));
-        this.panels().forEach((_, i) => this.resizeChild(children[i], i, _panelSizes));
+        panels.forEach((_, i) => this.resizeChild(children[i], i, _panelSizes));
     }
 
-    computePanelSizes(panelSizes: number[]) {
+    computePanelSizes(panels: TemplateRef<any>[], panelSizes: number[]) {
         let _panelSizes = [];
-        this.panels().forEach((_, i) => {
+        panels.forEach((_, i) => {
             let panelInitialSize = panelSizes.length - 1 >= i ? panelSizes[i] : null;
-            _panelSizes[i] = panelInitialSize || 100 / this.panels().length;
+            _panelSizes[i] = panelInitialSize || 100 / panels.length;
         });
         return _panelSizes;
     }
