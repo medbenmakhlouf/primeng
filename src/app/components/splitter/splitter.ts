@@ -8,6 +8,7 @@ import {
     EventEmitter,
     Inject,
     Input,
+    input,
     NgModule,
     Output,
     PLATFORM_ID,
@@ -34,8 +35,8 @@ import { SplitterStyle } from './style/splitterstyle';
         <div
             #container
             [ngClass]="containerClass()"
-            [class]="styleClass"
-            [ngStyle]="style"
+            [class]="styleClass()"
+            [ngStyle]="style()"
             [attr.data-pc-name]="'splitter'"
             [attr.data-p-gutter-resizing]="false"
             [attr.data-pc-section]="'root'"
@@ -43,8 +44,8 @@ import { SplitterStyle } from './style/splitterstyle';
             @for (panel of panels; track i; let i = $index) {
                 <div
                     [ngClass]="panelContainerClass()"
-                    [class]="panelStyleClass"
-                    [ngStyle]="panelStyle"
+                    [class]="panelStyleClass()"
+                    [ngStyle]="panelStyle()"
                     tabindex="-1"
                     [attr.data-pc-name]="'splitter'"
                     [attr.data-pc-section]="'root'"
@@ -90,22 +91,22 @@ export class Splitter extends BaseComponent {
      * Style class of the component.
      * @group Props
      */
-    @Input() styleClass: string | undefined;
+    styleClass = input<string>();
     /**
      * Style class of the panel.
      * @group Props
      */
-    @Input() panelStyleClass: string | undefined;
+    panelStyleClass = input<string>();
     /**
      * Inline style of the component.
      * @group Props
      */
-    @Input() style: { [klass: string]: any } | null | undefined;
+    style = input<{ [klass: string]: any } | null>();
     /**
      * Inline style of the panel.
      * @group Props
      */
-    @Input() panelStyle: { [klass: string]: any } | null | undefined;
+    panelStyle = input<{ [klass: string]: any } | null>();
     /**
      * Defines where a stateful splitter keeps its state, valid values are 'session' for sessionStorage and 'local' for localStorage.
      * @group Props
