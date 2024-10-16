@@ -132,7 +132,7 @@ export class Splitter extends BaseComponent {
      * Step factor to increment/decrement the size of the panels while pressing the arrow keys.
      * @group Props
      */
-    @Input({ transform: numberAttribute }) step: number = 5;
+    step = input<number, any>(5, { transform: numberAttribute });
     /**
      * Minimum size of the elements relative to 100%.
      * @group Props
@@ -410,7 +410,7 @@ export class Splitter extends BaseComponent {
         switch (event.code) {
             case 'ArrowLeft': {
                 if (this.horizontal()) {
-                    this.setTimer(event, index, this.step * -1);
+                    this.setTimer(event, index, this.step() * -1);
                 }
 
                 event.preventDefault();
@@ -419,7 +419,7 @@ export class Splitter extends BaseComponent {
 
             case 'ArrowRight': {
                 if (this.horizontal()) {
-                    this.setTimer(event, index, this.step);
+                    this.setTimer(event, index, this.step());
                 }
 
                 event.preventDefault();
@@ -428,7 +428,7 @@ export class Splitter extends BaseComponent {
 
             case 'ArrowDown': {
                 if (this.layout() === 'vertical') {
-                    this.setTimer(event, index, this.step * -1);
+                    this.setTimer(event, index, this.step() * -1);
                 }
 
                 event.preventDefault();
@@ -437,7 +437,7 @@ export class Splitter extends BaseComponent {
 
             case 'ArrowUp': {
                 if (this.layout() === 'vertical') {
-                    this.setTimer(event, index, this.step);
+                    this.setTimer(event, index, this.step());
                 }
 
                 event.preventDefault();
