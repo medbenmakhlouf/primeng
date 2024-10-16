@@ -556,8 +556,7 @@ export class Splitter extends BaseComponent {
 
         this.panels().map((_, i) => {
             let panelInitialSize = panelSizes.length - 1 >= i ? panelSizes[i] : null;
-            let panelSize = panelInitialSize || 100 / this.panels().length;
-            _panelSizes[i] = panelSize;
+            _panelSizes[i] = panelInitialSize || 100 / this.panels().length;
             this.resizeChild(children[i], i, _panelSizes);
         });
         return _panelSizes;
