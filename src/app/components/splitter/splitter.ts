@@ -117,7 +117,7 @@ export class Splitter extends BaseComponent {
      * Storage identifier of a stateful Splitter.
      * @group Props
      */
-    @Input() stateKey: string | undefined | null = null;
+    stateKey = input<string | null>(null);
     /**
      * Orientation of the panels. Valid values are 'horizontal' and 'vertical'.
      * @group Props
@@ -542,9 +542,7 @@ export class Splitter extends BaseComponent {
         }
     }
 
-    isStateful() {
-        return this.stateKey != null;
-    }
+    isStateful = computed<boolean>(() => this.stateKey() != null);
 
     getStorage = computed(() => {
         if (isPlatformBrowser(this.platformId)) {
@@ -566,12 +564,12 @@ export class Splitter extends BaseComponent {
     });
 
     saveState() {
-        this.getStorage().setItem(this.stateKey as string, JSON.stringify(this._panelSizes));
+        this.getStorage().setItem(this.stateKey() as string, JSON.stringify(this._panelSizes));
     }
 
     restoreState() {
         const storage = this.getStorage();
-        const stateString = storage.getItem(this.stateKey as string);
+        const stateString = storage.getItem(this.stateKey() as string);
 
         if (stateString) {
             this._panelSizes = JSON.parse(stateString);
