@@ -230,19 +230,6 @@ export class Splitter extends BaseComponent {
         }
     }
 
-    computePanelSizes() {
-        let children = [...this.el.nativeElement.children[0].children].filter((child) => DomHandler.hasClass(child, 'p-splitter-panel'));
-        let _panelSizes = [];
-
-        this.panels().map((_, i) => {
-            let panelInitialSize = this.panelSizes.length - 1 >= i ? this.panelSizes[i] : null;
-            let panelSize = panelInitialSize || 100 / this.panels().length;
-            _panelSizes[i] = panelSize;
-            children[i].style.flexBasis = 'calc(' + panelSize + '% - ' + (this.panels().length - 1) * this.gutterSize() + 'px)';
-        });
-        return _panelSizes;
-    }
-
     resizeStart(event: TouchEvent | MouseEvent, index: number, isKeyDown?: boolean) {
         this.gutterElement = (event.currentTarget as HTMLElement) || (event.target as HTMLElement).parentElement;
         this.size = this.horizontal()
@@ -561,6 +548,19 @@ export class Splitter extends BaseComponent {
         }
 
         return false;
+    }
+
+    computePanelSizes() {
+        let children = [...this.el.nativeElement.children[0].children].filter((child) => DomHandler.hasClass(child, 'p-splitter-panel'));
+        let _panelSizes = [];
+
+        this.panels().map((_, i) => {
+            let panelInitialSize = this.panelSizes.length - 1 >= i ? this.panelSizes[i] : null;
+            let panelSize = panelInitialSize || 100 / this.panels().length;
+            _panelSizes[i] = panelSize;
+            children[i].style.flexBasis = 'calc(' + panelSize + '% - ' + (this.panels().length - 1) * this.gutterSize() + 'px)';
+        });
+        return _panelSizes;
     }
 
     containerClass = computed(() => {
