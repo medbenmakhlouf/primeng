@@ -170,7 +170,7 @@ export class Splitter extends BaseComponent {
         return this.templates().map((item) => item.template);
     });
 
-    dragging = signal<boolean>(false);
+    dragging: boolean = false;
 
     mouseMoveListener: VoidListener;
 
@@ -180,11 +180,11 @@ export class Splitter extends BaseComponent {
 
     touchEndListener: VoidListener;
 
-    size = signal<Nullable<number>>(null);
+    size: Nullable<number>;
 
     gutterElement: Nullable<ElementRef | HTMLElement>;
 
-    startPos = signal<Nullable<number>>(null);
+    startPos: Nullable<number>;
 
     prevPanelElement: Nullable<ElementRef | HTMLElement>;
 
@@ -239,18 +239,17 @@ export class Splitter extends BaseComponent {
 
     resizeStart(container: HTMLDivElement, event: TouchEvent | MouseEvent, index: number, isKeyDown?: boolean) {
         this.gutterElement = (event.currentTarget as HTMLElement) || (event.target as HTMLElement).parentElement;
-        this.size.set(this.horizontal() ? DomHandler.getWidth(container) : DomHandler.getHeight(container));
+        this.size = this.horizontal() ? DomHandler.getWidth(container) : DomHandler.getHeight(container);
 
         if (!isKeyDown) {
-            this.dragging.set(true);
-            const startPos = this.horizontal()
+            this.dragging = true;
+            this.startPos = this.horizontal()
                 ? event instanceof MouseEvent
                     ? event.pageX
                     : event.changedTouches[0].pageX
                 : event instanceof MouseEvent
                   ? event.pageY
                   : event.changedTouches[0].pageY;
-            this.startPos.set(startPos);
         }
 
         this.prevPanelElement = this.gutterElement.previousElementSibling as HTMLElement;
@@ -269,13 +268,13 @@ export class Splitter extends BaseComponent {
                     (this.horizontal()
                         ? DomHandler.getOuterWidth(this.prevPanelElement, true)
                         : DomHandler.getOuterHeight(this.prevPanelElement, true))) /
-                this.size();
+                this.size;
             this.nextPanelSize =
                 (100 *
                     (this.horizontal()
                         ? DomHandler.getOuterWidth(this.nextPanelElement, true)
                         : DomHandler.getOuterHeight(this.nextPanelElement, true))) /
-                this.size();
+                this.size;
         }
 
         this.prevPanelIndex = index;
@@ -291,15 +290,15 @@ export class Splitter extends BaseComponent {
 
         if (isKeyDown) {
             if (this.horizontal()) {
-                newPrevPanelSize = (100 * (this.prevPanelSize + step)) / this.size();
-                newNextPanelSize = (100 * (this.nextPanelSize - step)) / this.size();
+                newPrevPanelSize = (100 * (this.prevPanelSize + step)) / this.size;
+                newNextPanelSize = (100 * (this.nextPanelSize - step)) / this.size;
             } else {
-                newPrevPanelSize = (100 * (this.prevPanelSize - step)) / this.size();
-                newNextPanelSize = (100 * (this.nextPanelSize + step)) / this.size();
+                newPrevPanelSize = (100 * (this.prevPanelSize - step)) / this.size;
+                newNextPanelSize = (100 * (this.nextPanelSize + step)) / this.size;
             }
         } else {
-            if (this.horizontal()) newPos = (event.pageX * 100) / this.size() - (this.startPos() * 100) / this.size();
-            else newPos = (event.pageY * 100) / this.size() - (this.startPos() * 100) / this.size();
+            if (this.horizontal()) newPos = (event.pageX * 100) / this.size - (this.startPos * 100) / this.size;
+            else newPos = (event.pageY * 100) / this.size - (this.startPos * 100) / this.size;
 
             newPrevPanelSize = (this.prevPanelSize as number) + newPos;
             newNextPanelSize = (this.nextPanelSize as number) - newPos;
@@ -491,9 +490,9 @@ export class Splitter extends BaseComponent {
     }
 
     clear() {
-        this.dragging.set(false);
-        this.size.set(null);
-        this.startPos.set(null);
+        this.dragging = false;
+        this.size = null;
+        this.startPos = null;
         this.prevPanelElement = null;
         this.nextPanelElement = null;
         this.prevPanelSize = null;
