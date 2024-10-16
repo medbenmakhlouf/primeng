@@ -69,7 +69,7 @@ import { SplitterStyle } from './style/splitterstyle';
                             class="p-splitter-gutter-handle"
                             tabindex="0"
                             [ngStyle]="gutterStyle()"
-                            [attr.aria-orientation]="layout"
+                            [attr.aria-orientation]="layout()"
                             [attr.aria-valuenow]="prevSize"
                             [attr.data-pc-section]="'gutterhandle'"
                             (keyup)="onGutterKeyUp($event)"
@@ -122,7 +122,7 @@ export class Splitter extends BaseComponent {
      * Orientation of the panels. Valid values are 'horizontal' and 'vertical'.
      * @group Props
      */
-    @Input() layout: string | undefined = 'horizontal';
+    layout = input<string>('horizontal');
     /**
      * Size of the divider in pixels.
      * @group Props
@@ -410,7 +410,7 @@ export class Splitter extends BaseComponent {
     onGutterKeyDown(event, index) {
         switch (event.code) {
             case 'ArrowLeft': {
-                if (this.layout === 'horizontal') {
+                if (this.horizontal()) {
                     this.setTimer(event, index, this.step * -1);
                 }
 
@@ -419,7 +419,7 @@ export class Splitter extends BaseComponent {
             }
 
             case 'ArrowRight': {
-                if (this.layout === 'horizontal') {
+                if (this.horizontal()) {
                     this.setTimer(event, index, this.step);
                 }
 
@@ -428,7 +428,7 @@ export class Splitter extends BaseComponent {
             }
 
             case 'ArrowDown': {
-                if (this.layout === 'vertical') {
+                if (this.layout() === 'vertical') {
                     this.setTimer(event, index, this.step * -1);
                 }
 
@@ -437,7 +437,7 @@ export class Splitter extends BaseComponent {
             }
 
             case 'ArrowUp': {
-                if (this.layout === 'vertical') {
+                if (this.layout() === 'vertical') {
                     this.setTimer(event, index, this.step);
                 }
 
@@ -586,13 +586,13 @@ export class Splitter extends BaseComponent {
         return false;
     }
 
-    containerClass() {
+    containerClass = computed(() => {
         return {
             'p-splitter p-component': true,
-            'p-splitter-horizontal': this.layout === 'horizontal',
-            'p-splitter-vertical': this.layout === 'vertical',
+            'p-splitter-horizontal': this.layout() === 'horizontal',
+            'p-splitter-vertical': this.layout() === 'vertical',
         };
-    }
+    });
 
     panelContainerClass() {
         return {
@@ -606,9 +606,7 @@ export class Splitter extends BaseComponent {
         else return { height: this.gutterSize + 'px' };
     }
 
-    horizontal() {
-        return this.layout === 'horizontal';
-    }
+    horizontal = computed<boolean>(() => this.layout() === 'horizontal');
 }
 
 @NgModule({
