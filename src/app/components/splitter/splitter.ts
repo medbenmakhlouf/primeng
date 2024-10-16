@@ -14,7 +14,7 @@ import {
     PLATFORM_ID,
     QueryList,
     Renderer2,
-    ViewChild,
+    viewChild,
     ViewEncapsulation,
     inject,
     numberAttribute,
@@ -161,7 +161,7 @@ export class Splitter extends BaseComponent {
 
     templates: Signal<readonly PrimeTemplate[]> = contentChildren(PrimeTemplate);
 
-    @ViewChild('container', { static: false }) containerViewChild: Nullable<ElementRef>;
+    containerViewChild: Signal<Nullable<ElementRef>> = viewChild<Nullable<ElementRef>>('container');
 
     nested: boolean = false;
 
@@ -236,8 +236,8 @@ export class Splitter extends BaseComponent {
     resizeStart(event: TouchEvent | MouseEvent, index: number, isKeyDown?: boolean) {
         this.gutterElement = (event.currentTarget as HTMLElement) || (event.target as HTMLElement).parentElement;
         this.size = this.horizontal()
-            ? DomHandler.getWidth((this.containerViewChild as ElementRef).nativeElement)
-            : DomHandler.getHeight((this.containerViewChild as ElementRef).nativeElement);
+            ? DomHandler.getWidth((this.containerViewChild() as ElementRef).nativeElement)
+            : DomHandler.getHeight((this.containerViewChild() as ElementRef).nativeElement);
 
         if (!isKeyDown) {
             this.dragging.set(true);
@@ -278,8 +278,8 @@ export class Splitter extends BaseComponent {
         this.prevPanelIndex = index;
         DomHandler.addClass(this.gutterElement, 'p-splitter-gutter-resizing');
         this.gutterElement.setAttribute('data-p-gutter-resizing', 'true');
-        DomHandler.addClass((this.containerViewChild as ElementRef).nativeElement, 'p-splitter-resizing');
-        this.containerViewChild.nativeElement.setAttribute('data-p-resizing', 'true');
+        DomHandler.addClass((this.containerViewChild() as ElementRef).nativeElement, 'p-splitter-resizing');
+        this.containerViewChild().nativeElement.setAttribute('data-p-resizing', 'true');
         this.onResizeStart.emit({ originalEvent: event, sizes: this._panelSizes().values() });
     }
 
@@ -324,7 +324,7 @@ export class Splitter extends BaseComponent {
 
         this.onResizeEnd.emit({ originalEvent: event, sizes: this._panelSizes().values() });
         DomHandler.removeClass(this.gutterElement, 'p-splitter-gutter-resizing');
-        DomHandler.removeClass((this.containerViewChild as ElementRef).nativeElement, 'p-splitter-resizing');
+        DomHandler.removeClass((this.containerViewChild() as ElementRef).nativeElement, 'p-splitter-resizing');
         this.clear();
     }
 
@@ -548,7 +548,7 @@ export class Splitter extends BaseComponent {
     }
 
     resizeFromContainers(_panelSizes: number[]) {
-        let children = [...(this.containerViewChild as ElementRef).nativeElement.children].filter((child) =>
+        let children = [...(this.containerViewChild() as ElementRef).nativeElement.children].filter((child) =>
             DomHandler.hasClass(child, 'p-splitter-panel'),
         );
         children.forEach((child, i) => this.resizeChild(child, i, _panelSizes));
