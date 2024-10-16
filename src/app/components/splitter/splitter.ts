@@ -19,6 +19,7 @@ import {
     inject,
     numberAttribute,
     computed,
+    effect,
 } from '@angular/core';
 import { PrimeTemplate, SharedModule } from 'primeng/api';
 import { DomHandler } from 'primeng/dom';
@@ -142,16 +143,7 @@ export class Splitter extends BaseComponent {
      * Size of the elements relative to 100%.
      * @group Props
      */
-    @Input() get panelSizes(): number[] {
-        return this._panelSizes;
-    }
-    set panelSizes(val: number[]) {
-        this._panelSizes = this.computePanelSizes(val);
-
-        if (this.el && this.el.nativeElement && this.panels().length > 0) {
-            this.resizeFromElements(this._panelSizes);
-        }
-    }
+    panelSizes = input<number[], any[]>([], { transform: (values) => values.map(numberAttribute) });
     /**
      * Callback to invoke when resize ends.
      * @param {SplitterResizeEndEvent} event - Custom panel resize end event
@@ -200,7 +192,11 @@ export class Splitter extends BaseComponent {
 
     prevPanelSize: Nullable<number>;
 
-    _panelSizes: number[] = [];
+    initialized = computed<boolean>(() => (this.isStateful() ? this.savedPanelSizes() !== null : false));
+
+    _panelSizes = computed<number[]>(() => {
+        return !this.initialized() ? this.computePanelSizes(this.panelSizes()) : this.savedPanelSizes();
+    });
 
     prevPanelIndex: Nullable<number>;
 
@@ -210,29 +206,27 @@ export class Splitter extends BaseComponent {
 
     _componentStyle = inject(SplitterStyle);
 
+    constructor() {
+        super();
+        effect(() => {
+            if (isPlatformBrowser(this.platformId)) {
+                if (this.panels() && this.panels().length) {
+                    if (!this.initialized()) {
+                        if (this.el && this.el.nativeElement) {
+                            this.resizeFromElements(this._panelSizes());
+                        }
+                        this.prevSize = parseFloat(`${this._panelSizes()[0]}`).toFixed(4);
+                    } else {
+                        this.resizeFromContainers(this._panelSizes());
+                    }
+                }
+            }
+        });
+    }
+
     ngOnInit() {
         super.ngOnInit();
         this.nested = this.isNested();
-    }
-
-    ngAfterViewInit() {
-        super.ngAfterViewInit();
-        if (isPlatformBrowser(this.platformId)) {
-            if (this.panels() && this.panels().length) {
-                const savedPanelSizes = this.savedPanelSizes();
-                const initialized = this.isStateful() ? savedPanelSizes !== null : false;
-                this._panelSizes = !initialized ? this.computePanelSizes(this.panelSizes) : savedPanelSizes;
-
-                if (!initialized) {
-                    if (this.el && this.el.nativeElement) {
-                        this.resizeFromElements(this._panelSizes);
-                    }
-                    this.prevSize = parseFloat(`${this._panelSizes[0]}`).toFixed(4);
-                } else {
-                    this.resizeFromContainers(this._panelSizes);
-                }
-            }
-        }
     }
 
     resizeStart(event: TouchEvent | MouseEvent, index: number, isKeyDown?: boolean) {
@@ -282,7 +276,7 @@ export class Splitter extends BaseComponent {
         this.gutterElement.setAttribute('data-p-gutter-resizing', 'true');
         DomHandler.addClass((this.containerViewChild as ElementRef).nativeElement, 'p-splitter-resizing');
         this.containerViewChild.nativeElement.setAttribute('data-p-resizing', 'true');
-        this.onResizeStart.emit({ originalEvent: event, sizes: this._panelSizes as number[] });
+        this.onResizeStart.emit({ originalEvent: event, sizes: this._panelSizes() });
     }
 
     onResize(event: MouseEvent, step?: number, isKeyDown?: boolean) {
@@ -311,8 +305,8 @@ export class Splitter extends BaseComponent {
                 'calc(' + newPrevPanelSize + '% - ' + (this.panels().length - 1) * this.gutterSize() + 'px)';
             (this.nextPanelElement as HTMLElement).style.flexBasis =
                 'calc(' + newNextPanelSize + '% - ' + (this.panels().length - 1) * this.gutterSize() + 'px)';
-            this._panelSizes[this.prevPanelIndex as number] = newPrevPanelSize;
-            this._panelSizes[(this.prevPanelIndex as number) + 1] = newNextPanelSize;
+            this._panelSizes()[this.prevPanelIndex as number] = newPrevPanelSize;
+            this._panelSizes()[(this.prevPanelIndex as number) + 1] = newNextPanelSize;
         }
     }
 
@@ -321,7 +315,7 @@ export class Splitter extends BaseComponent {
             this.saveState();
         }
 
-        this.onResizeEnd.emit({ originalEvent: event, sizes: this._panelSizes });
+        this.onResizeEnd.emit({ originalEvent: event, sizes: this._panelSizes() });
         DomHandler.removeClass(this.gutterElement, 'p-splitter-gutter-resizing');
         DomHandler.removeClass((this.containerViewChild as ElementRef).nativeElement, 'p-splitter-resizing');
         this.clear();
@@ -539,7 +533,7 @@ export class Splitter extends BaseComponent {
     });
 
     saveState() {
-        this.getStorage().setItem(this.stateKey() as string, JSON.stringify(this._panelSizes));
+        this.getStorage().setItem(this.stateKey() as string, JSON.stringify(this._panelSizes()));
     }
 
     resizeChild(child, i: number, _panelSizes: number[]) {
