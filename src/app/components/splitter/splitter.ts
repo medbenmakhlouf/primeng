@@ -73,7 +73,7 @@ import { SplitterStyle } from './style/splitterstyle';
                             tabindex="0"
                             [ngStyle]="gutterStyle()"
                             [attr.aria-orientation]="layout()"
-                            [attr.aria-valuenow]="prevSize"
+                            [attr.aria-valuenow]="prevSize()"
                             [attr.data-pc-section]="'gutterhandle'"
                             (keyup)="onGutterKeyUp(container, $event)"
                             (keydown)="onGutterKeyDown(container, $event, i)"
@@ -206,7 +206,11 @@ export class Splitter extends BaseComponent {
 
     timer: any;
 
-    prevSize: any;
+    prevSize = computed(() => {
+        const panelSizes = untracked(this._panelSizes().values);
+        const value = !this.initialized() ? parseFloat(`${panelSizes[0]}`).toFixed(4) : undefined;
+        return { value: signal(value) };
+    });
 
     _componentStyle = inject(SplitterStyle);
 
@@ -214,14 +218,13 @@ export class Splitter extends BaseComponent {
         super();
         effect(() => {
             const panels = this.panels();
+            const panelSizes = untracked(this._panelSizes().values);
             if (isPlatformBrowser(this.platformId)) {
                 if (panels && panels.length) {
-                    const panelSizes = untracked(this._panelSizes().values);
                     if (!this.initialized()) {
                         if (this.el && this.el.nativeElement) {
                             this.resizeFromElements(panels, panelSizes);
                         }
-                        this.prevSize = parseFloat(`${panelSizes[0]}`).toFixed(4);
                     } else {
                         if (this.containerViewChild()) {
                             this.resizeFromContainers((this.containerViewChild() as ElementRef).nativeElement, panelSizes);
@@ -304,7 +307,7 @@ export class Splitter extends BaseComponent {
             newNextPanelSize = (this.nextPanelSize as number) - newPos;
         }
 
-        this.prevSize = parseFloat(newPrevPanelSize).toFixed(4);
+        this.prevSize().value.set(parseFloat(newPrevPanelSize).toFixed(4));
 
         if (this.validateResize(newPrevPanelSize, newNextPanelSize)) {
             (this.prevPanelElement as HTMLElement).style.flexBasis =
