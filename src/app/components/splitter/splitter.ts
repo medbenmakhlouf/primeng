@@ -221,7 +221,9 @@ export class Splitter extends BaseComponent {
                         }
                         this.prevSize = parseFloat(`${panelSizes[0]}`).toFixed(4);
                     } else {
-                        this.resizeFromContainers(panelSizes);
+                        if (this.containerViewChild()){
+                            this.resizeFromContainers(panelSizes);
+                        }
                     }
                 }
             }
