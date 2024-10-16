@@ -127,7 +127,7 @@ export class Splitter extends BaseComponent {
      * Size of the divider in pixels.
      * @group Props
      */
-    @Input({ transform: numberAttribute }) gutterSize: number = 4;
+    gutterSize = input<number, any>(4, { transform: numberAttribute });
     /**
      * Step factor to increment/decrement the size of the panels while pressing the arrow keys.
      * @group Props
@@ -158,7 +158,7 @@ export class Splitter extends BaseComponent {
                 let panelInitialSize = this.panelSizes.length - 1 >= i ? this.panelSizes[i] : null;
                 let panelSize = panelInitialSize || 100 / this.panels.length;
                 _panelSizes[i] = panelSize;
-                children[i].style.flexBasis = 'calc(' + panelSize + '% - ' + (this.panels.length - 1) * this.gutterSize + 'px)';
+                children[i].style.flexBasis = 'calc(' + panelSize + '% - ' + (this.panels.length - 1) * this.gutterSize() + 'px)';
             });
         }
     }
@@ -254,8 +254,7 @@ export class Splitter extends BaseComponent {
                         let panelInitialSize = this.panelSizes.length - 1 >= i ? this.panelSizes[i] : null;
                         let panelSize = panelInitialSize || 100 / this.panels.length;
                         _panelSizes[i] = panelSize;
-                        children[i].style.flexBasis =
-                            'calc(' + panelSize + '% - ' + (this.panels.length - 1) * (this.gutterSize as number) + 'px)';
+                        children[i].style.flexBasis = 'calc(' + panelSize + '% - ' + (this.panels.length - 1) * this.gutterSize() + 'px)';
                     });
 
                     this._panelSizes = _panelSizes;
@@ -339,9 +338,9 @@ export class Splitter extends BaseComponent {
 
         if (this.validateResize(newPrevPanelSize, newNextPanelSize)) {
             (this.prevPanelElement as HTMLElement).style.flexBasis =
-                'calc(' + newPrevPanelSize + '% - ' + (this.panels.length - 1) * this.gutterSize + 'px)';
+                'calc(' + newPrevPanelSize + '% - ' + (this.panels.length - 1) * this.gutterSize() + 'px)';
             (this.nextPanelElement as HTMLElement).style.flexBasis =
-                'calc(' + newNextPanelSize + '% - ' + (this.panels.length - 1) * this.gutterSize + 'px)';
+                'calc(' + newNextPanelSize + '% - ' + (this.panels.length - 1) * this.gutterSize() + 'px)';
             this._panelSizes[this.prevPanelIndex as number] = newPrevPanelSize;
             this._panelSizes[(this.prevPanelIndex as number) + 1] = newNextPanelSize;
         }
@@ -577,7 +576,7 @@ export class Splitter extends BaseComponent {
                 DomHandler.hasClass(child, 'p-splitter-panel'),
             );
             children.forEach((child, i) => {
-                child.style.flexBasis = 'calc(' + this._panelSizes[i] + '% - ' + (this.panels.length - 1) * this.gutterSize + 'px)';
+                child.style.flexBasis = 'calc(' + this._panelSizes[i] + '% - ' + (this.panels.length - 1) * this.gutterSize() + 'px)';
             });
 
             return true;
@@ -601,10 +600,10 @@ export class Splitter extends BaseComponent {
         };
     }
 
-    gutterStyle() {
-        if (this.horizontal()) return { width: this.gutterSize + 'px' };
-        else return { height: this.gutterSize + 'px' };
-    }
+    gutterStyle = computed(() => {
+        if (this.horizontal()) return { width: this.gutterSize() + 'px' };
+        else return { height: this.gutterSize() + 'px' };
+    });
 
     horizontal = computed<boolean>(() => this.layout() === 'horizontal');
 }
