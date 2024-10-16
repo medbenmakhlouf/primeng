@@ -137,7 +137,7 @@ export class Splitter extends BaseComponent {
      * Minimum size of the elements relative to 100%.
      * @group Props
      */
-    @Input({ transform: numberAttribute }) minSizes: number[] = [];
+    minSizes = input<number[], any[]>([], { transform: (values)=> values.map(numberAttribute) });
     /**
      * Size of the elements relative to 100%.
      * @group Props
@@ -442,11 +442,11 @@ export class Splitter extends BaseComponent {
     }
 
     validateResize(newPrevPanelSize: number, newNextPanelSize: number) {
-        if (this.minSizes.length >= 1 && this.minSizes[0] && this.minSizes[0] > newPrevPanelSize) {
+        if (this.minSizes().length >= 1 && this.minSizes()[0] && this.minSizes()[0] > newPrevPanelSize) {
             return false;
         }
 
-        if (this.minSizes.length > 1 && this.minSizes[1] && this.minSizes[1] > newNextPanelSize) {
+        if (this.minSizes().length > 1 && this.minSizes()[1] && this.minSizes()[1] > newNextPanelSize) {
             return false;
         }
 
