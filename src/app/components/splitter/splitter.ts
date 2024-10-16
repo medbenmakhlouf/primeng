@@ -184,7 +184,7 @@ export class Splitter extends BaseComponent {
 
     gutterElement: Nullable<ElementRef | HTMLElement>;
 
-    startPos: Nullable<number>;
+    startPos = signal<Nullable<number>>(null);
 
     prevPanelElement: Nullable<ElementRef | HTMLElement>;
 
@@ -242,13 +242,14 @@ export class Splitter extends BaseComponent {
 
         if (!isKeyDown) {
             this.dragging.set(true);
-            this.startPos = this.horizontal()
+            const startPos = this.horizontal()
                 ? event instanceof MouseEvent
                     ? event.pageX
                     : event.changedTouches[0].pageX
                 : event instanceof MouseEvent
                   ? event.pageY
                   : event.changedTouches[0].pageY;
+            this.startPos.set(startPos);
         }
 
         this.prevPanelElement = this.gutterElement.previousElementSibling as HTMLElement;
@@ -296,8 +297,8 @@ export class Splitter extends BaseComponent {
                 newNextPanelSize = (100 * (this.nextPanelSize + step)) / this.size();
             }
         } else {
-            if (this.horizontal()) newPos = (event.pageX * 100) / this.size() - (this.startPos * 100) / this.size();
-            else newPos = (event.pageY * 100) / this.size() - (this.startPos * 100) / this.size();
+            if (this.horizontal()) newPos = (event.pageX * 100) / this.size() - (this.startPos() * 100) / this.size();
+            else newPos = (event.pageY * 100) / this.size() - (this.startPos() * 100) / this.size();
 
             newPrevPanelSize = (this.prevPanelSize as number) + newPos;
             newNextPanelSize = (this.nextPanelSize as number) - newPos;
@@ -491,7 +492,7 @@ export class Splitter extends BaseComponent {
     clear() {
         this.dragging.set(false);
         this.size.set(null);
-        this.startPos = null;
+        this.startPos.set(null);
         this.prevPanelElement = null;
         this.nextPanelElement = null;
         this.prevPanelSize = null;
