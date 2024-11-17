@@ -1,4 +1,4 @@
-import { CommonModule, DOCUMENT, isPlatformBrowser } from '@angular/common';
+import { CommonModule, isPlatformBrowser } from '@angular/common';
 import {
     ChangeDetectionStrategy,
     Signal,
@@ -7,13 +7,9 @@ import {
     ElementRef,
     OutputEmitterRef,
     TemplateRef,
-    Input,
     input,
     NgModule,
     output,
-    PLATFORM_ID,
-    QueryList,
-    Renderer2,
     viewChild,
     ViewEncapsulation,
     inject,
