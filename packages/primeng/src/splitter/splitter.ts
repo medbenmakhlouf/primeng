@@ -147,15 +147,17 @@ export class Splitter extends BaseComponent {
      */
     onResizeStart: OutputEmitterRef<SplitterResizeStartEvent> = output<SplitterResizeStartEvent>();
 
-    templates: Signal<readonly PrimeTemplate[]> = contentChildren(PrimeTemplate);
+    _templates: Signal<readonly PrimeTemplate[]> = contentChildren(PrimeTemplate);
+    _panels: Signal<readonly PrimeTemplate[]> = contentChildren('panel');
 
     containerViewChild: Signal<Nullable<ElementRef>> = viewChild<Nullable<ElementRef>>('container');
 
     nested = signal<boolean>(false);
 
     panels = computed<TemplateRef<any>[]>(() => {
-        if (!this.templates()) return [];
-        return this.templates().map((item) => item.template);
+        if (this._templates()) return this._templates().map((item) => item.template);
+        if (this._panels()) return this._panels().map((item) => item.template);
+        return [];
     });
 
     dragging: boolean = false;
@@ -228,31 +230,9 @@ export class Splitter extends BaseComponent {
         this.nested.set(this.isNested());
     }
 
-    @ContentChildren('panel') _templates: QueryList<any>;
-
-    ngAfterContentInit() {
-        super.ngAfterContentInit();
-        this._templates.toArray().forEach((item) => {
-            this.panels.push(item.template);
-        });
-    }
-
-    ngAfterContentInit() {
-        this.templates.forEach((item) => {
-            switch (item.getType()) {
-                case 'panel':
-                    this.panels.push(item.template);
-                    break;
-                default:
-                    this.panels.push(item.template);
-                    break;
-            }
-        });
-    }
-
     resizeStart(container: HTMLDivElement, event: TouchEvent | MouseEvent, index: number, isKeyDown?: boolean) {
         this.gutterElement = (event.currentTarget as HTMLElement) || (event.target as HTMLElement).parentElement;
-        this.size = this.horizontal() ? DomHandler.getWidth(container) : DomHandler.getHeight(container);
+        this.size = this.horizontal() ? getWidth(container) : getHeight(container);
 
         if (!isKeyDown) {
             this.dragging = true;
@@ -539,12 +519,12 @@ export class Splitter extends BaseComponent {
     }
 
     resizeFromContainers(container: HTMLDivElement, _panelSizes: number[]) {
-        let children = Array.from(container.children).filter((child) => DomHandler.hasClass(child, 'p-splitter-panel'));
+        let children = Array.from(container.children).filter((child) => hasClass(child, 'p-splitter-panel'));
         children.forEach((child, i) => this.resizeChild(child, i, _panelSizes));
     }
 
     resizeFromElements(panels: TemplateRef<any>[], _panelSizes: number[]) {
-        let children = [...this.el.nativeElement.children[0].children].filter((child) => DomHandler.hasClass(child, 'p-splitter-panel'));
+        let children = [...this.el.nativeElement.children[0].children].filter((child) => hasClass(child, 'p-splitter-panel'));
         panels.forEach((_, i) => this.resizeChild(children[i], i, _panelSizes));
     }
 
